@@ -2,6 +2,7 @@ package com.mutantsparade.mutantdetected.web.rest;
 
 import com.mutantsparade.mutantdetected.domain.Dna;
 import com.mutantsparade.mutantdetected.domain.DnaStats;
+import com.mutantsparade.mutantdetected.service.DnaStatsService;
 import com.mutantsparade.mutantdetected.service.MutantDetectedService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,23 +21,46 @@ public class MutantDetectedController {
     Logger log = LoggerFactory.getLogger(MutantDetectedController.class);
 
     @Autowired
-    MutantDetectedService mutantDetectedService;
+    private MutantDetectedService mutantDetectedService;
 
+    @Autowired
+    private DnaStatsService dnaStatsService;
+
+    /**
+     * Checks if given dna code is mutant (or human), based on an algorithm.
+     * If it's mutant, retur HTTP status 200, if not retunrs HTTP status 403.
+     *
+     * It also validates that the DNA code received has the correct format:
+     * 6 chains of 6 characters each, where only ACGT characters are permited.
+     * If dna code is invalid, an exception with HTTP status 500 is thrown.
+     *
+     * Keeps track of every dna verification in a database.
+     *
+     * @param dna The dna code to verify if it's mutant or not.
+     */
     @PostMapping(path= "/mutant")
     public void mutant(@RequestBody Dna dna)  {
         log.info("Dna to verify: " + Arrays.toString(dna.getDna()));
 
-        if (!(mutantDetectedService.verifyDna(dna))) {
-            String message = "You are NOT a mutant: " + Arrays.toString(dna.getDna());
+        if (!(mutantDetectedService.isMutant(dna))) {
+            String message = String.format("You are NOT a mutant: %s", Arrays.toString(dna.getDna()));
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, message);
         }
     }
 
+    /**
+     * Calculate and return stats about total dna verification requests:
+     * 1. Number of requests with mutant dna (count_mutant_dna)
+     * 2. Number of requests with human dna (count_human_dna)
+     * 3. Percent of mutants requests over humans (ratio)
+     *
+     * @return stats described above
+     */
     @GetMapping(path = "/stats")
     public CompletableFuture<DnaStats> stats() {
-        log.info("Looking for stats ...");
+        log.info("Looking for dna verification stats ...");
 
-        return mutantDetectedService.getStats();
+        return dnaStatsService.getStats();
     }
 
 }

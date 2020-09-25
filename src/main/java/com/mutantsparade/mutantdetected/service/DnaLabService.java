@@ -7,10 +7,33 @@ import java.util.Optional;
 
 public interface DnaLabService {
 
+    /**
+     * Look at the persistence service to find an already verified DNA
+     * for a given DNA hash code.
+     *
+     * @param dna DNA hash code to find
+     * @return a DNA already verified
+     */
     Optional<VerifiedDna> findByDnaHash(String dna);
 
+    /**
+     * Updates in the database the times that a certain DNA was verified.
+     *
+     * @param verifiedDna the DNA being verified
+     */
     void update(VerifiedDna verifiedDna);
 
-    Boolean verifyAndtrack(Dna dna);
+    /**
+     * Checks if given DNA code is mutant (or human).
+     * If it's mutant returns true, otherwise returns false.
+     *
+     * Keeps track of every DNA verification in a database too.
+     *
+     * PRECONDITION: DNA code must be in a correct format:
+     * 6 chains of 6 characters each, where only ACGT characters are permited.
+     *
+     * @param dna The DNA code to verify if it's mutant or not.
+     */
+    Boolean verifyMutantAndtrackRecord(Dna dna);
 
 }
