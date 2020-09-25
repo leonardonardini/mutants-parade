@@ -14,6 +14,7 @@ GET
 /api/stats
 (no parameters are required)
 
+
 To detailed documentation please refer to Swagger API Documentation: https://mutantdetected.herokuapp.com/v2/api-docs
 
 For testing purpoeses use Swagger Endpoints Testing utility: https://mutantdetected.herokuapp.com/swagger-ui.html
