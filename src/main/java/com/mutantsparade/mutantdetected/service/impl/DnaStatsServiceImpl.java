@@ -14,10 +14,10 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class DnaStatsServiceImpl implements DnaStatsService {
 
-    Logger log = LoggerFactory.getLogger(DnaStatsServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DnaStatsServiceImpl.class);
 
     @Autowired
-    DnaStatsRepository dnaStatsRepository;
+    private DnaStatsRepository dnaStatsRepository;
 
     /**
      * Calculate and return stats about total dna verification requests:

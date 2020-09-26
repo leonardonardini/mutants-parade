@@ -1,0 +1,1 @@
+insert into verified_dna (id, dna_hash, mutant, quantity) values (1, 'UPDATE', TRUE, 100);

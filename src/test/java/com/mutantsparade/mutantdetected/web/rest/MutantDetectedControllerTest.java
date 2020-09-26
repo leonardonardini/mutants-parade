@@ -1,6 +1,8 @@
 package com.mutantsparade.mutantdetected.web.rest;
 
 import com.mutantsparade.mutantdetected.domain.DnaStats;
+import com.mutantsparade.mutantdetected.errors.DnaNotMutantException;
+import com.mutantsparade.mutantdetected.errors.InvalidDnaCodeException;
 import com.mutantsparade.mutantdetected.service.DnaStatsService;
 import com.mutantsparade.mutantdetected.service.MutantDetectedService;
 import org.junit.jupiter.api.Test;
@@ -17,7 +19,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(value = MutantDetectedController.class)
@@ -35,7 +37,7 @@ class MutantDetectedControllerTest {
     @Test
     void testIsMutant() throws Exception {
 
-        when(mutantDetectedService.isMutant(any())).thenReturn(true);
+        doNothing().when(mutantDetectedService).verifyMutant(any());
 
         RequestBuilder request = MockMvcRequestBuilders.post("/api/mutant")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -48,19 +50,31 @@ class MutantDetectedControllerTest {
     @Test
     void testIsNotMutant() throws Exception {
 
-        when(mutantDetectedService.isMutant(any())).thenReturn(false);
+        doThrow(new DnaNotMutantException("NOT mutant")).when(mutantDetectedService).verifyMutant(any());
 
         RequestBuilder request = MockMvcRequestBuilders.post("/api/mutant")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\n" +
-                        "\"dna\":[\"AAAAAA\",\"AAAAAA\",\"AAAAAA\",\"AAAAAA\",\"AAAAAA\",\"AAAAAA\"]\n" +
+                        "\"dna\":[\"AACAAA\",\"AAAAAA\",\"AAAAAA\",\"AAAAAA\",\"AAAAAA\",\"AAAAAA\"]\n" +
                         "}");
         mvc.perform(request).andExpect(status().isForbidden());
     }
 
     @Test
-    void stats() throws Exception {
+    void testInvalidDna() throws Exception {
 
+        doThrow(new InvalidDnaCodeException("INVALID DNA")).when(mutantDetectedService).verifyMutant(any());
+
+        RequestBuilder request = MockMvcRequestBuilders.post("/api/mutant")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\n" +
+                        "\"dna\":[\"\",\"AAAAAA\",\"AAAAAA\",\"AAAAAA\",\"AAAAAA\",\"AAAAAA\"]\n" +
+                        "}");
+        mvc.perform(request).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testStats() throws Exception {
         DnaStats dnaStats = new DnaStats();
         dnaStats.setCount_human_dna(0L);
         dnaStats.setCount_mutant_dna(0L);

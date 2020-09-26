@@ -4,6 +4,7 @@ import com.mutantsparade.mutantdetected.domain.Dna;
 import com.mutantsparade.mutantdetected.domain.VerifiedDna;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public interface DnaLabService {
 
@@ -30,10 +31,11 @@ public interface DnaLabService {
      * Keeps track of every DNA verification in a database too.
      *
      * PRECONDITION: DNA code must be in a correct format:
-     * 6 chains of 6 characters each, where only ACGT characters are permited.
+     * N chains of N characters each, where only ACGT characters are permited.
      *
      * @param dna The DNA code to verify if it's mutant or not.
+     * @return true if DNA es mutant, false otherwise
      */
-    Boolean verifyMutantAndtrackRecord(Dna dna);
+    CompletableFuture<Boolean> verifyMutantAndtrackRecord(Dna dna);
 
 }

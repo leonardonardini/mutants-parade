@@ -2,6 +2,8 @@ package com.mutantsparade.mutantdetected.web.rest;
 
 import com.mutantsparade.mutantdetected.domain.Dna;
 import com.mutantsparade.mutantdetected.domain.DnaStats;
+import com.mutantsparade.mutantdetected.errors.DnaNotMutantException;
+import com.mutantsparade.mutantdetected.errors.InvalidDnaCodeException;
 import com.mutantsparade.mutantdetected.service.DnaStatsService;
 import com.mutantsparade.mutantdetected.service.MutantDetectedService;
 import org.slf4j.Logger;
@@ -18,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 @RequestMapping("/api")
 public class MutantDetectedController {
 
-    Logger log = LoggerFactory.getLogger(MutantDetectedController.class);
+    private static final Logger log = LoggerFactory.getLogger(MutantDetectedController.class);
 
     @Autowired
     private MutantDetectedService mutantDetectedService;
@@ -42,9 +44,15 @@ public class MutantDetectedController {
     public void mutant(@RequestBody Dna dna)  {
         log.info("Dna to verify: " + Arrays.toString(dna.getDna()));
 
-        if (!(mutantDetectedService.isMutant(dna))) {
-            String message = String.format("You are NOT a mutant: %s", Arrays.toString(dna.getDna()));
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, message);
+        try {
+            mutantDetectedService.verifyMutant(dna);
+
+        } catch (InvalidDnaCodeException idce) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, idce.getMessage(), idce);
+
+        } catch (DnaNotMutantException dnme) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, dnme.getMessage(), dnme);
+
         }
     }
 

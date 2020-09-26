@@ -86,6 +86,14 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.6</version>
+				<configuration>
+					<excludes>
+						<!-- Exclude class from test coverage -->
+						<exclude>**/MutantdetectedApplication.class</exclude>
+						<!-- Exclude full package from test coverage -->
+						<exclude>**/web/rest/conf/**</exclude>
+					</excludes>
+				</configuration>
 				<executions>
 					<execution>
 						<goals>

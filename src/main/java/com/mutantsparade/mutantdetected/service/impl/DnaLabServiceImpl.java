@@ -5,6 +5,7 @@ import com.mutantsparade.mutantdetected.domain.VerifiedDna;
 import com.mutantsparade.mutantdetected.repository.VerifiedDnaRepository;
 import com.mutantsparade.mutantdetected.service.DnaLabService;
 import com.mutantsparade.mutantdetected.service.DnaLabTrackingService;
+import com.mutantsparade.mutantdetected.utils.DnaUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,17 +13,18 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class DnaLabServiceImpl implements DnaLabService {
 
-    Logger log = LoggerFactory.getLogger(MutantDetectedServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(MutantDetectedServiceImpl.class);
 
     @Autowired
-    VerifiedDnaRepository verifiedDnaRepository;
+    private VerifiedDnaRepository verifiedDnaRepository;
 
     @Autowired
-    DnaLabTrackingService dnaLabTrackingService;
+    private DnaLabTrackingService dnaLabTrackingService;
 
     /**
      * Search the database for a verified DNA record,
@@ -54,43 +56,21 @@ public class DnaLabServiceImpl implements DnaLabService {
      * Keeps track of every DNA verification in a database too.
      *
      * PRECONDITION: DNA code must be in a correct format:
-     * 6 chains of 6 characters each, where only ACGT characters are permited.
+     * N chains of N characters each, where only ACGT characters are permited.
      *
      * @param dna The DNA code to verify if it's mutant or not.
+     * @return true if DNA es mutant, false otherwise
      */
-    public Boolean verifyMutantAndtrackRecord(Dna dna) {
+    @Async
+    public CompletableFuture<Boolean> verifyMutantAndtrackRecord(Dna dna) {
         log.debug("Dna verification ...");
 
-        boolean isMutant = isMutant(dna.getDna());
+        boolean isMutant = DnaUtils.isMutant(dna.getDna());
 
         dnaLabTrackingService.track(dna, isMutant);
 
-        return isMutant;
+        return CompletableFuture.completedFuture(isMutant);
     }
 
-
-    /**
-     * Checks if given DNA code is mutant (or human).
-     * If it's mutant returns true, otherwise returns false.
-     *
-     * DNA is considered mutant if, after forming a 6 x 6 characters matrix,
-     * at least 3 strings with 4 equal consecutive characters are found within that matrix,
-     * arranged horizontally, vertically or obliquely.
-     *
-     * PRECONDITION: DNA code must be in a correct format:
-     * 6 chains of 6 characters each, where only ACGT characters are permited.
-     *
-     * @param dna The DNA code to verify if it's mutant or not.
-     */
-    private boolean isMutant(String[] dna) {
-        log.debug("Checking DNA condition");
-
-        if (dna[0].equals("AAAAAA")) {
-            return true;
-
-        } else {
-            return false;
-        }
-    }
 
 }
