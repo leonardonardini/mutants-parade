@@ -7,7 +7,7 @@ The app functionality includes a DNA verification utility to check if a given DN
 For accessing this funtionalities the app provides an API with two endPoits:
 
 ### POST
-#### /api/mutant
+### /api/mutant
 (requires the DNA to be verified, as JSON format body)
 
 command line execution example:
@@ -16,7 +16,7 @@ curl -X POST "https://mutantdetected.herokuapp.com/api/mutant" -H  "accept: */*"
 ```
 
 ### GET
-#### /api/stats
+### /api/stats
 (no parameters are required)
 
 command line execution example:
@@ -27,7 +27,7 @@ curl -X GET "https://mutantdetected.herokuapp.com/api/stats" -H  "accept: */*"
 ## Swagger
 For detailed API documentation please refer to *Swagger* API Documentation: https://mutantdetected.herokuapp.com/v2/api-docs
 
-For testing purpoeses youy could use *Swagger* Endpoints Testing utility: https://mutantdetected.herokuapp.com/swagger-ui.html
+For testing you could use *Swagger* Endpoints Testing utility: https://mutantdetected.herokuapp.com/swagger-ui.html
 
 ## Code Coverege
 Code coverge was analized using JaCoCo tool reaching 99 %
