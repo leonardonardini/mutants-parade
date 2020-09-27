@@ -1,7 +1,7 @@
 # :dna: mutants-parade app :dna:
 This app is aim to check if given DNA :dna: correspond or not to a mutant ... it's a direct order from Magneto! :magnet:
 
-The app functionality includes a DNA verification utility to check if a given DNA code corresponds or not to a mutant being, and statistics about DNA verification usability.
+The app functionality includes a DNA verification utility to check if a given DNA code corresponds or not to a mutant being, and statistics about DNA verification usability. :microscope:
 
 ## API
 For accessing this funtionalities the app provides an API with two endPoits:
