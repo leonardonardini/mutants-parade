@@ -15,14 +15,14 @@ public interface DnaLabService {
      * @param dna DNA hash code to find
      * @return a DNA already verified
      */
-    Optional<VerifiedDna> findByDnaHash(String dna);
+    CompletableFuture<Optional<VerifiedDna>> findByDnaHash(String dna);
 
     /**
      * Updates in the database the times that a certain DNA was verified.
      *
      * @param verifiedDna the DNA being verified
      */
-    void update(VerifiedDna verifiedDna);
+    void incrementQuantityAndSave(VerifiedDna verifiedDna);
 
     /**
      * Checks if given DNA code is mutant (or human).
@@ -36,6 +36,6 @@ public interface DnaLabService {
      * @param dna The DNA code to verify if it's mutant or not.
      * @return true if DNA es mutant, false otherwise
      */
-    CompletableFuture<Boolean> verifyMutantAndtrackRecord(Dna dna);
+    CompletableFuture<Boolean> verifyMutantAndTrackRecord(Dna dna);
 
 }

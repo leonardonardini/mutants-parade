@@ -33,7 +33,8 @@ public class DnaLabServiceImpl implements DnaLabService {
      * @param dna the hash code of a given DNA
      * @return En entity representing an already verified DNA
      */
-    public Optional<VerifiedDna> findByDnaHash(String dna) {
+    @Async
+    public CompletableFuture<Optional<VerifiedDna>> findByDnaHash(String dna) {
         return verifiedDnaRepository.findByDnaHash(dna);
     }
 
@@ -44,7 +45,7 @@ public class DnaLabServiceImpl implements DnaLabService {
      */
     @Override
     @Async
-    public void update(VerifiedDna verifiedDna) {
+    public void incrementQuantityAndSave(VerifiedDna verifiedDna) {
         verifiedDna.setQuantity(verifiedDna.getQuantity() + 1);
         verifiedDnaRepository.save(verifiedDna);
     }
@@ -61,15 +62,18 @@ public class DnaLabServiceImpl implements DnaLabService {
      * @param dna The DNA code to verify if it's mutant or not.
      * @return true if DNA es mutant, false otherwise
      */
-    @Async
-    public CompletableFuture<Boolean> verifyMutantAndtrackRecord(Dna dna) {
+    public CompletableFuture<Boolean> verifyMutantAndTrackRecord(Dna dna) {
         log.debug("Dna verification ...");
 
-        boolean isMutant = DnaUtils.isMutant(dna.getDna());
+        return CompletableFuture.supplyAsync(() -> {
+            boolean isMutant = DnaUtils.isMutant(dna.getDna());
 
-        dnaLabTrackingService.track(dna, isMutant);
+            dnaLabTrackingService.track(dna, isMutant);
 
-        return CompletableFuture.completedFuture(isMutant);
+            return isMutant;
+
+        });
+
     }
 
 

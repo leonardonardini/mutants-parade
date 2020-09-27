@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.mutantsparade</groupId>
 	<artifactId>mutantdetected</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>mutantdetected</name>
 	<description>Check mutant DNA by Magneto</description>
 

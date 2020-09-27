@@ -11,15 +11,15 @@ public interface MutantDetectedService {
      * If it's NOT mutant throws a DnaNotMutantException.
      *
      * It also validates that the DNA code received has the correct format:
-     * 6 chains of 6 characters each, where only ACGT characters are permited,
+     * N chains of N characters each, where only ACGT characters are permited,
      * and throws InvalidDnaCodeException if it is not a valid DNA code.
      *
      * Keeps track of every dna verification in a database too.
      *
      * @param dna The dna code to verify if it's mutant or not.
      *
-     * @throws InvalidDnaCodeException
-     * @throws DnaNotMutantException
+     * @throws InvalidDnaCodeException may be thrown by DnaUtils.validateDnaFormat
+     * @throws DnaNotMutantException is throws by this method if param dna is not mutant
      *
      */
     void verifyMutant(Dna dna) throws InvalidDnaCodeException, DnaNotMutantException;

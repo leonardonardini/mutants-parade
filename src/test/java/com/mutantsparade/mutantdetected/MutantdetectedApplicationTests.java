@@ -1,7 +1,6 @@
 package com.mutantsparade.mutantdetected;
 
 import com.mutantsparade.mutantdetected.domain.Dna;
-import com.mutantsparade.mutantdetected.domain.DnaStats;
 import com.mutantsparade.mutantdetected.domain.VerifiedDna;
 import com.mutantsparade.mutantdetected.errors.DnaNotMutantException;
 import com.mutantsparade.mutantdetected.errors.InvalidDnaCodeException;
@@ -21,6 +20,11 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * This test class contains unit tests.
+ * Tests must cover all posibble code branches.
+ *
+ */
 @SpringBootTest
 class MutantdetectedApplicationTests {
 
@@ -38,7 +42,7 @@ class MutantdetectedApplicationTests {
 	void testIsMutant() throws Exception {
 		Dna dna = new Dna();
 		dna.setDna(new String[]{"AAAAAA","AAAAAA","AAAAAA","AAAAAA","AAAAAA","AAAAAA"});
-		CompletableFuture<Boolean> isMutant = dnaLabService.verifyMutantAndtrackRecord(dna);
+		CompletableFuture<Boolean> isMutant = dnaLabService.verifyMutantAndTrackRecord(dna);
 		assertEquals(true, isMutant.get());
 	}
 
@@ -46,8 +50,8 @@ class MutantdetectedApplicationTests {
 	@Transactional
 	void testIsNotMutant() throws Exception {
 		Dna dna = new Dna();
-		dna.setDna(new String[]{"AACAAA","AAAAAA","AAAAAA","AAAAAA","AAAAAA","AAAAAA"});
-		CompletableFuture<Boolean> isMutant = dnaLabService.verifyMutantAndtrackRecord(dna);
+		dna.setDna(new String[]{"ACGT","TCGA","CAAT","AAAC"});
+		CompletableFuture<Boolean> isMutant = dnaLabService.verifyMutantAndTrackRecord(dna);
 		assertEquals(false, isMutant.get());
 	}
 
@@ -63,7 +67,7 @@ class MutantdetectedApplicationTests {
 	@Transactional
 	void testVerifyNotMutant() {
 		Dna dna = new Dna();
-		dna.setDna(new String[]{"AACAAA","AAAAAA","AAAAAA","AAAAAA","AAAAAA","AAAAAA"});
+		dna.setDna(new String[]{"ACGT","TCGA","CAAT","AAAC"});
 		assertThrows(DnaNotMutantException.class, () -> mutantDetectedService.verifyMutant(dna));
 	}
 
@@ -74,6 +78,12 @@ class MutantdetectedApplicationTests {
 		Dna dna = new Dna();
 		dna.setDna(new String[]{"AAAAAA","AAAAAA","AAAAAA","AAAAAA","AAAAAA","AAAAAA"});
 		assertDoesNotThrow(() -> mutantDetectedService.verifyMutant(dna));
+	}
+
+	@Test
+	void testIsNotMutant_Complete_Algorithm() {
+		String[] dna = new String[]{"AGTCAG","TCATGA","CATACA","AAGTCT","TCAGAG","CGATTA"};
+		assertFalse(DnaUtils.isMutant(dna));
 	}
 
 	@Test
@@ -101,6 +111,21 @@ class MutantdetectedApplicationTests {
 	}
 
 	@Test
+	void testNotValidDnaCode_sizeMin() {
+		String[] dna = new String[]{"AAAA","AAA","AAA"};
+		assertThrows(InvalidDnaCodeException.class, () -> DnaUtils.validateDnaFormat(dna));
+	}
+
+	@Test
+	void testNotValidDnaCode_sizeMax() {
+		String[] dna = new String[]{"AAAAAAAAAAAAAAAA","AAAAAAAAAAAAAAAA","AAAAAAAAAAAAAAAA","AAAAAAAAAAAAAAAA"
+				,"AAAAAAAAAAAAAAAA","AAAAAAAAAAAAAAAA","AAAAAAAAAAAAAAAA","AAAAAAAAAAAAAAAA","AAAAAAAAAAAAAAAA"
+				,"AAAAAAAAAAAAAAAA","AAAAAAAAAAAAAAAA","AAAAAAAAAAAAAAAA","AAAAAAAAAAAAAAAA","AAAAAAAAAAAAAAAA"
+				,"AAAAAAAAAAAAAAAA","AAAAAAAAAAAAAAAA"};
+		assertThrows(InvalidDnaCodeException.class, () -> DnaUtils.validateDnaFormat(dna));
+	}
+
+	@Test
 	void testNotValidDnaCode_regexp1() {
 		String[] dna = new String[]{"AACAAAAAAAAAAA","AAAAAA","AAAAAA","AAAAAA","AAAAAA","AAAAAA"};
 		assertThrows(InvalidDnaCodeException.class, () -> DnaUtils.validateDnaFormat(dna));
@@ -112,12 +137,12 @@ class MutantdetectedApplicationTests {
 		assertThrows(InvalidDnaCodeException.class, () -> DnaUtils.validateDnaFormat(dna));
 	}
 
+	@SneakyThrows
 	@Test
 	@Sql("/test.sql")
-	@Transactional
 	void testFindVerifiedDnaExists() {
-		String dnaHash = "AAAAAA-AAAAAA-AAAAAA-AAAAAA-AAAAAA-AAAAAA";
-		Optional<VerifiedDna> verifiedDna = dnaLabService.findByDnaHash(dnaHash);
+		String dnaHash = "AAAA-AAAA-AAAA-AAAA";
+		Optional<VerifiedDna> verifiedDna = dnaLabService.findByDnaHash(dnaHash).get();
 
 		assertEquals(verifiedDna.get().getDnaHash(), dnaHash);
 		assertEquals(verifiedDna.get().getQuantity(), 10);
@@ -125,10 +150,11 @@ class MutantdetectedApplicationTests {
 		assertEquals(verifiedDna.get().isMutant(), true);
 	}
 
+	@SneakyThrows
 	@Test
 	void testFindVerifiedDnaNotExists() {
 		String dnaHash = "sarasa";
-		Optional<VerifiedDna> verifiedDna = dnaLabService.findByDnaHash(dnaHash);
+		Optional<VerifiedDna> verifiedDna = dnaLabService.findByDnaHash(dnaHash).get();
 
 		assertEquals(verifiedDna.isPresent(), false);
 	}
@@ -137,11 +163,11 @@ class MutantdetectedApplicationTests {
 	@Test
 	@Sql("/testUpdate.sql")
 	void testUpdateExistingVerifiedDna() {
-		Optional<VerifiedDna> verifiedDna = dnaLabService.findByDnaHash("UPDATE");
+		Optional<VerifiedDna> verifiedDna = dnaLabService.findByDnaHash("AGTC-AGTC-AGTC-AGTC").get();
 		Long quantityBeforeUpdate = verifiedDna.get().getQuantity();
-		assertDoesNotThrow(() -> dnaLabService.update(verifiedDna.get()));
+		assertDoesNotThrow(() -> dnaLabService.incrementQuantityAndSave(verifiedDna.get()));
 		Thread.sleep(100);
-		Optional<VerifiedDna> verifiedDnaAfterUpdate = dnaLabService.findByDnaHash("UPDATE");
+		Optional<VerifiedDna> verifiedDnaAfterUpdate = dnaLabService.findByDnaHash("AGTC-AGTC-AGTC-AGTC").get();
 		assertEquals(quantityBeforeUpdate + 1, verifiedDnaAfterUpdate.get().getQuantity());
 	}
 
@@ -154,7 +180,7 @@ class MutantdetectedApplicationTests {
 		verifiedDna.setMutant(false);
 		assertDoesNotThrow(() -> verifiedDnaRepository.save(verifiedDna));
 		Thread.sleep(100);
-		Optional<VerifiedDna> verifiedDnaAfterUpdate = dnaLabService.findByDnaHash("H");
+		Optional<VerifiedDna> verifiedDnaAfterUpdate = dnaLabService.findByDnaHash("H").get();
 		assertEquals("H", verifiedDnaAfterUpdate.get().getDnaHash());
 		assertEquals(1L, verifiedDnaAfterUpdate.get().getQuantity());
 		assertEquals(false, verifiedDnaAfterUpdate.get().isMutant());

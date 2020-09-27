@@ -1,1 +1,1 @@
-insert into verified_dna (id, dna_hash, mutant, quantity) values (1, 'UPDATE', TRUE, 100);
+insert into verified_dna (id, dna_hash, mutant, quantity) values (100, 'AGTC-AGTC-AGTC-AGTC', TRUE, 100);

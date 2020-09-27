@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 public class MutantDetectedServiceImpl implements MutantDetectedService {
@@ -30,15 +29,15 @@ public class MutantDetectedServiceImpl implements MutantDetectedService {
      * If it's NOT mutant throws a DnaNotMutantException.
      *
      * It also validates that the DNA code received has the correct format:
-     * 6 chains of 6 characters each, where only ACGT characters are permited,
+     * N chains of N characters each, where only ACGT characters are permited,
      * and throws InvalidDnaCodeException if it is not a valid DNA code.
      *
      * Keeps track of every dna verification in a database too.
      *
      * @param dna The dna code to verify if it's mutant or not.
      *
-     * @throws InvalidDnaCodeException
-     * @throws DnaNotMutantException
+     * @throws InvalidDnaCodeException may be thrown by DnaUtils.validateDnaFormat
+     * @throws DnaNotMutantException is throws by this method if param dna is not mutant
      *
      */
     @SneakyThrows
@@ -46,19 +45,21 @@ public class MutantDetectedServiceImpl implements MutantDetectedService {
     public void verifyMutant(Dna dna) throws InvalidDnaCodeException, DnaNotMutantException {
         Boolean isMutant;
 
+        //may throws InvalidDnaCodeException
         DnaUtils.validateDnaFormat(dna.getDna());
 
-        Optional<VerifiedDna> verifiedDna = dnaLabService.findByDnaHash(dna.getDnaHash());
+        Optional<VerifiedDna> verifiedDna = dnaLabService.findByDnaHash(dna.getDnaHash()).get();
 
         if (verifiedDna.isPresent()) {
             log.debug("DNA already verified");
             VerifiedDna persistentVerifiedDna = verifiedDna.get();
+            //take the result of the already verified DNA entity
             isMutant = persistentVerifiedDna.isMutant();
-            dnaLabService.update(persistentVerifiedDna);
+            dnaLabService.incrementQuantityAndSave(persistentVerifiedDna);
 
         } else {
-            CompletableFuture<Boolean> cf = dnaLabService.verifyMutantAndtrackRecord(dna);
-            isMutant = cf.get();
+            //first time the given DNA is being verified
+            isMutant = dnaLabService.verifyMutantAndTrackRecord(dna).get();
         }
 
         if (!isMutant) {

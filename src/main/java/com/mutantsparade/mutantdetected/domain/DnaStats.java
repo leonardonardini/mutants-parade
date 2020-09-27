@@ -1,5 +1,6 @@
 package com.mutantsparade.mutantdetected.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -9,8 +10,10 @@ import lombok.ToString;
 @ToString
 public class DnaStats {
 
-    private Long count_mutant_dna;
-    private Long count_human_dna;
+    @JsonProperty("count_mutant_dna")
+    private long countMutantDna;
+    @JsonProperty("count_human_dna")
+    private Long countHumanDna;
     private Double ratio;
 
 }

@@ -8,11 +8,11 @@ public interface DnaStatsService {
 
     /**
      * Calculate and return stats about total dna verification requests:
-     * 1. Number of requests with mutant dna (count_mutant_dna)
-     * 2. Number of requests with human dna (count_human_dna)
+     * 1. Number of requests with mutant dna (countMutantDna)
+     * 2. Number of requests with human dna (countHumanDna)
      * 3. Percent of mutants requests over humans (ratio)
      *
-     * @return stats described above
+     * @return a DnaStats object with the stats described above
      */
     CompletableFuture<DnaStats> getStats();
 
